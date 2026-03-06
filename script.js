@@ -76,7 +76,10 @@ function ajouterNote(){
         savedNotes[currentUser] = [];
     }
 
-    savedNotes[currentUser].push(objetNote);
+   if (!savedNotes[currentUser]) {
+    savedNotes[currentUser] = [];
+}
+savedNotes[currentUser].push(objetNote);
     localStorage.setItem("notes", JSON.stringify(savedNotes));
 
     notes = savedNotes[currentUser];
