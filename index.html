@@ -2,54 +2,229 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Calculateur de Moyenne</title>
-<link rel="stylesheet" href="style.css">
+<title>Gestion des Notes</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #app { display: none; }
+    h2 { margin-top: 30px; }
+    input { margin: 5px 0; padding: 5px; }
+    button { margin: 5px 0; padding: 5px 10px; }
+    ul { list-style: none; padding-left: 0; }
+    li { margin: 5px 0; cursor: pointer; }
+    li:hover { background: #f0f0f0; }
+    .message { color: green; margin: 10px 0; }
+    .error { color: red; margin: 10px 0; }
+</style>
 </head>
-
 <body>
 
-<div class="container">
-
-<h1>Calculateur de moyenne</h1>
-
 <div id="auth">
+    <h2>Inscription</h2>
+    <input type="text" id="registerUser" placeholder="Utilisateur">
+    <input type="password" id="registerPass" placeholder="Mot de passe">
+    <button onclick="register()">Créer un compte</button>
+    <div id="registerMsg" class="message"></div>
 
-<h2>Créer un compte</h2>
-<input id="registerUser" placeholder="Nom d'utilisateur">
-<input id="registerPass" type="password" placeholder="Mot de passe">
-<button onclick="register()">Créer</button>
-
-<h2>Connexion</h2>
-<input id="loginUser" placeholder="Nom d'utilisateur">
-<input id="loginPass" type="password" placeholder="Mot de passe">
-<button onclick="login()">Connexion</button>
-
+    <h2>Connexion</h2>
+    <input type="text" id="loginUser" placeholder="Utilisateur">
+    <input type="password" id="loginPass" placeholder="Mot de passe">
+    <button onclick="login()">Se connecter</button>
+    <div id="loginMsg" class="error"></div>
 </div>
 
-<div id="app" style="display:none;">
+<div id="app">
+    <h2>Bienvenue, <span id="currentUserDisplay"></span></h2>
+    <button onclick="logout()">Déconnexion</button>
 
-<h2>Ajouter une note</h2>
+    <h3>Ajouter une note</h3>
+    <input type="text" id="matiere" placeholder="Matière">
+    <input type="number" step="0.01" id="note" placeholder="Note">
+    <input type="number" step="0.01" id="coef" placeholder="Coefficient">
+    <button onclick="ajouterNote()">Ajouter</button>
+    <div id="noteMsg" class="message"></div>
 
-<input id="matiere" placeholder="Matière">
-<input id="note" type="number" placeholder="Note">
-<input id="coef" type="number" placeholder="Coef">
+    <h3>Liste des notes</h3>
+    <ul id="listeNotes"></ul>
+    <div id="stats"></div>
 
-<button onclick="ajouterNote()">Ajouter</button>
-
-<h2>Notes</h2>
-<ul id="listeNotes"></ul>
-
-<h2>Moyenne générale :</h2>
-<h1 id="moyenne">0</h1>
-
-<button onclick="logout()">Se déconnecter</button>
-
+    <h3>Moyenne : <span id="moyenne">0.00</span></h3>
 </div>
 
-</div>
+<script>
+// ----- Variables globales -----
+let notes = [];
+let currentUser = null;
 
-<script src="script.js"></script>
+// ----- Inscription -----
+function register() {
+    let user = document.getElementById("registerUser").value.trim().toLowerCase();
+    let pass = document.getElementById("registerPass").value.trim();
+    let msg = document.getElementById("registerMsg");
+    msg.textContent = "";
 
-</body>
-</html>
-<p id="credit">Fait par Lucien BARLET</p>
+    if(user === "" || pass === ""){
+        msg.textContent = "Remplis tous les champs";
+        msg.className = "error";
+        return;
+    }
+
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
+    if(users.some(u => u.user === user)){
+        msg.textContent = "Utilisateur déjà existant";
+        msg.className = "error";
+        return;
+    }
+
+    users.push({ user, pass });
+    localStorage.setItem("users", JSON.stringify(users));
+    msg.textContent = "Compte créé !";
+    msg.className = "message";
+
+    document.getElementById("registerUser").value = "";
+    document.getElementById("registerPass").value = "";
+}
+
+// ----- Connexion -----
+function login() {
+    let user = document.getElementById("loginUser").value.trim().toLowerCase();
+    let pass = document.getElementById("loginPass").value.trim();
+    let msg = document.getElementById("loginMsg");
+    msg.textContent = "";
+
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
+    let found = users.find(u => u.user === user && u.pass === pass);
+
+    if(found){
+        currentUser = user;
+        document.getElementById("auth").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        document.getElementById("currentUserDisplay").textContent = currentUser;
+        chargerNotes();
+    } else {
+        msg.textContent = "Identifiants incorrects";
+    }
+}
+
+// ----- Déconnexion -----
+function logout(){
+    currentUser = null;
+    notes = [];
+    document.getElementById("auth").style.display = "block";
+    document.getElementById("app").style.display = "none";
+}
+
+// ----- Ajouter une note -----
+function ajouterNote(){
+    let matiere = document.getElementById("matiere").value.trim();
+    let note = parseFloat(document.getElementById("note").value);
+    let coef = parseFloat(document.getElementById("coef").value);
+    let msg = document.getElementById("noteMsg");
+    msg.textContent = "";
+
+    if(!matiere || isNaN(note) || isNaN(coef)){
+        msg.textContent = "Remplis tous les champs correctement";
+        msg.className = "error";
+        return;
+    }
+    if(note < 0 || coef <= 0){
+        msg.textContent = "La note doit être ≥ 0 et le coefficient > 0";
+        msg.className = "error";
+        return;
+    }
+
+    let objetNote = { matiere, note, coef };
+
+    let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
+    if(!savedNotes[currentUser]){
+        savedNotes[currentUser] = [];
+    }
+    savedNotes[currentUser].push(objetNote);
+    localStorage.setItem("notes", JSON.stringify(savedNotes));
+
+    notes = savedNotes[currentUser];
+    afficherNotes();
+    calculerMoyenne();
+
+    document.getElementById("matiere").value = "";
+    document.getElementById("note").value = "";
+    document.getElementById("coef").value = "";
+    msg.textContent = "Note ajoutée !";
+    msg.className = "message";
+}
+
+// ----- Charger les notes -----
+function chargerNotes(){
+    let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
+    notes = savedNotes[currentUser] || [];
+    afficherNotes();
+    calculerMoyenne();
+}
+
+// ----- Afficher les notes -----
+function afficherNotes() {
+    let liste = document.getElementById("listeNotes");
+    liste.innerHTML = "";
+
+    if(notes.length === 0){
+        liste.textContent = "Aucune note ajoutée.";
+        document.getElementById("stats").textContent = "";
+        return;
+    }
+
+    notes.forEach((n, index) => {
+        let li = document.createElement("li");
+        li.textContent = n.matiere + " : " + n.note + " (coef " + n.coef + ")";
+        li.title = "Cliquez pour modifier";
+
+        // Cliquer pour modifier
+        li.onclick = () => {
+            let newMatiere = prompt("Matière :", n.matiere);
+            let newNote = parseFloat(prompt("Note :", n.note));
+            let newCoef = parseFloat(prompt("Coefficient :", n.coef));
+            if(newMatiere && !isNaN(newNote) && !isNaN(newCoef) && newNote >=0 && newCoef>0){
+                n.matiere = newMatiere.trim();
+                n.note = newNote;
+                n.coef = newCoef;
+                let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
+                savedNotes[currentUser] = notes;
+                localStorage.setItem("notes", JSON.stringify(savedNotes));
+                afficherNotes();
+                calculerMoyenne();
+            }
+        };
+
+        // Bouton supprimer
+        let btn = document.createElement("button");
+        btn.textContent = "Supprimer";
+        btn.style.marginLeft = "10px";
+        btn.onclick = (e) => {
+            e.stopPropagation(); // empêche le click parent
+            notes.splice(index, 1);
+            let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
+            savedNotes[currentUser] = notes;
+            localStorage.setItem("notes", JSON.stringify(savedNotes));
+            afficherNotes();
+            calculerMoyenne();
+        };
+
+        li.appendChild(btn);
+        liste.appendChild(li);
+    });
+
+    document.getElementById("stats").textContent = `Nombre de notes : ${notes.length}`;
+}
+
+// ----- Calculer la moyenne -----
+function calculerMoyenne(){
+    let total = 0;
+    let totalCoef = 0;
+
+    notes.forEach(n => {
+        total += n.note * n.coef;
+        totalCoef += n.coef;
+    });
+
+    let moyenne = totalCoef > 0 ? total / totalCoef : 0;
+    document.getElementById("moyenne").textContent = moyenne.toFixed(2);
+}
+</script>
