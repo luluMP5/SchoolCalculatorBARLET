@@ -55,7 +55,16 @@ function ajouterNote(){
 
     notes.push(objetNote);
 
-    localStorage.setItem("notes", JSON.stringify(notes));
+    let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
+
+// currentUser est le nom de l'utilisateur connecté
+if(!savedNotes[currentUser]){
+    savedNotes[currentUser] = [];
+}
+
+savedNotes[currentUser].push(objetNote);
+
+localStorage.setItem("notes", JSON.stringify(savedNotes));
 
     afficherNotes();
     calculerMoyenne();
@@ -116,4 +125,28 @@ function calculerMoyenne(){
     }
 
     document.getElementById("moyenne").textContent = moyenne.toFixed(2);
+}
+function chargerNotes(currentUser){
+    let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
+    notes = savedNotes[currentUser] || [];
+    afficherNotes();
+    calculerMoyenne();
+}
+let currentUser = null;
+
+function login() {
+    let user = document.getElementById("loginUser").value;
+    let pass = document.getElementById("loginPass").value;
+
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
+    let found = users.find(u => u.user === user && u.pass === pass);
+
+    if(found){
+        currentUser = user; // on stocke l'utilisateur connecté
+        document.getElementById("auth").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        chargerNotes(currentUser);
+    } else {
+        alert("Identifiants incorrects");
+    }
 }
