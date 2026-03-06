@@ -76,21 +76,29 @@ function chargerNotes(){
     calculerMoyenne();
 }
 
-function afficherNotes(){
-
+function afficherNotes() {
     let liste = document.getElementById("listeNotes");
     liste.innerHTML = "";
 
-    notes.forEach(n => {
-
+    notes.forEach((n, index) => {
         let li = document.createElement("li");
-        li.textContent = n.matiere + " : " + n.note + " (coef " + n.coef + ")";
+        li.textContent = n.matiere + " : " + n.note + " (coef " + n.coef + ") ";
+
+        // Créer bouton supprimer
+        let btn = document.createElement("button");
+        btn.textContent = "Supprimer";
+        btn.style.marginLeft = "10px";
+        btn.onclick = () => {
+            notes.splice(index, 1); // supprime la note du tableau
+            localStorage.setItem("notes", JSON.stringify(notes)); // met à jour localStorage
+            afficherNotes(); // rafraîchit la liste
+            calculerMoyenne(); // recalcule la moyenne
+        };
+
+        li.appendChild(btn);
         liste.appendChild(li);
-
     });
-
 }
-
 function calculerMoyenne(){
 
     let total = 0;
