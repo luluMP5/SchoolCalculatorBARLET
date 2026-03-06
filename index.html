@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Calculateur de Moyenne</title>
+<link rel="stylesheet" href="style.css">
+</head>
 
+<body>
+
+<div class="container">
+
+<h1>Calculateur de moyenne</h1>
+
+<div id="auth">
+
+<h2>Créer un compte</h2>
+<input id="registerUser" placeholder="Nom d'utilisateur">
+<input id="registerPass" type="password" placeholder="Mot de passe">
+<button onclick="register()">Créer</button>
+
+<h2>Connexion</h2>
+<input id="loginUser" placeholder="Nom d'utilisateur">
+<input id="loginPass" type="password" placeholder="Mot de passe">
+<button onclick="login()">Connexion</button>
+
+</div>
+
+<div id="app" style="display:none;">
+
+<h2>Ajouter une note</h2>
+
+<input id="matiere" placeholder="Matière">
+<input id="note" type="number" placeholder="Note">
+<input id="coef" type="number" placeholder="Coef">
+
+<button onclick="ajouterNote()">Ajouter</button>
+
+<h2>Notes</h2>
+<ul id="listeNotes"></ul>
+
+<h2>Moyenne générale :</h2>
+<h1 id="moyenne">0</h1>
+
+<button onclick="logout()">Se déconnecter</button>
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
