@@ -1,107 +1,55 @@
-body{
-
-font-family:Arial;
-background:#f5f7fb;
-margin:0;
-padding:30px;
-
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f0f0f0;
+    color: #333;
 }
 
-header{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-
+input, button {
+    padding: 8px;
+    margin: 5px 0;
 }
 
-section{
-
-margin:20px 0;
-background:white;
-padding:15px;
-border-radius:8px;
-
+button {
+    cursor: pointer;
 }
 
-.dark{
-
-background:#1e1e1e;
-color:white;
-
+ul {
+    list-style: none;
+    padding: 0;
 }
 
-.dark section{
-
-background:#2d2d2d;
-
+li {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    padding: 5px;
+    background: #fff;
+    border-radius: 5px;
 }
 
-input{
+.good { color: green; }
+.medium { color: orange; }
+.bad { color: red; }
 
-display:block;
-margin:5px 0;
-padding:8px;
-width:200px;
+.msg { color: red; margin-top: 5px; }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-button{
-
-padding:8px 12px;
-background:#2a78ff;
-color:white;
-border:none;
-border-radius:6px;
-cursor:pointer;
-
+body.dark {
+    background: #1c1c1c;
+    color: #eee;
 }
 
-button:hover{
-
-background:#1d55b5;
-
+body.dark input, body.dark button, body.dark li {
+    background: #333;
+    color: #eee;
 }
 
-ul{
-
-list-style:none;
-padding:0;
-
-}
-
-li{
-
-display:flex;
-justify-content:space-between;
-background:#eef2f8;
-margin:5px 0;
-padding:8px;
-border-radius:6px;
-
-}
-
-.good{
-
-color:green;
-font-weight:bold;
-
-}
-
-.medium{
-
-color:orange;
-
-}
-
-.bad{
-
-color:red;
-
-}
-
-#app{
-
-display:none;
-
+body.dark li {
+    border: 1px solid #555;
 }
