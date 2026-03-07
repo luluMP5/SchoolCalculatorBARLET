@@ -122,12 +122,6 @@ function ajouterNote() {
     document.getElementById("coef").value = "";
 }
 
-saved[currentUser].push({
-matiere: mat,
-note: n,
-coef: c
-})
-
 localStorage.setItem("notes", JSON.stringify(saved))
 
 notes = saved[currentUser]
