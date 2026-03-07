@@ -1,176 +1,306 @@
-// ----- Variables globales -----
-let notes = [];
-let currentUser = null;
+let notes = []
+let currentUser = null
 
-// ----- Inscription -----
-function register() {
-    let user = document.getElementById("registerUser").value.trim().toLowerCase();
-    let pass = document.getElementById("registerPass").value.trim();
-    let msg = document.getElementById("registerMsg");
-    msg.textContent = "";
+const auth = document.getElementById("auth")
+const app = document.getElementById("app")
 
-    if(user === "" || pass === ""){
-        msg.textContent = "Remplis tous les champs";
-        msg.className = "error";
-        return;
-    }
+// boutons
+document.getElementById("registerBtn").onclick = register
+document.getElementById("loginBtn").onclick = login
+document.getElementById("logoutBtn").onclick = logout
+document.getElementById("addNoteBtn").onclick = ajouterNote
 
-    let users = JSON.parse(localStorage.getItem("users") || "[]");
+document.getElementById("searchInput").addEventListener("input",rechercher)
 
-    if(users.some(u => u.user === user)){
-        msg.textContent = "Utilisateur déjà existant";
-        msg.className = "error";
-        return;
-    }
+window.onload = autoLogin
 
-    users.push({ user, pass });
-    localStorage.setItem("users", JSON.stringify(users));
+// ---------- AUTO LOGIN ----------
 
-    msg.textContent = "Compte créé !";
-    msg.className = "message";
+function autoLogin(){
 
-    document.getElementById("registerUser").value = "";
-    document.getElementById("registerPass").value = "";
+let savedUser = localStorage.getItem("currentUser")
+
+if(savedUser){
+
+currentUser = savedUser
+
+auth.style.display="none"
+app.style.display="block"
+
+document.getElementById("currentUser").textContent=currentUser
+
+chargerNotes()
+
 }
 
-// ----- Connexion -----
-function login() {
-    let user = document.getElementById("loginUser").value.trim().toLowerCase();
-    let pass = document.getElementById("loginPass").value.trim();
-    let msg = document.getElementById("loginMsg");
-    msg.textContent = "";
-
-    let users = JSON.parse(localStorage.getItem("users") || "[]");
-    let found = users.find(u => u.user === user && u.pass === pass);
-
-    if(found){
-        currentUser = user;
-        document.getElementById("auth").style.display = "none";
-        document.getElementById("app").style.display = "block";
-        document.getElementById("currentUserDisplay").textContent = currentUser;
-        chargerNotes();
-    } else {
-        msg.textContent = "Identifiants incorrects";
-        msg.className = "error";
-    }
 }
 
-// ----- Déconnexion -----
+// ---------- INSCRIPTION ----------
+
+function register(){
+
+let user=document.getElementById("registerUser").value.trim().toLowerCase()
+let pass=document.getElementById("registerPass").value.trim()
+
+let msg=document.getElementById("registerMsg")
+
+if(!user || !pass){
+
+msg.textContent="Remplis tous les champs"
+msg.className="error"
+return
+
+}
+
+let users=JSON.parse(localStorage.getItem("users")||"[]")
+
+if(users.some(u=>u.user===user)){
+
+msg.textContent="Utilisateur déjà existant"
+msg.className="error"
+return
+
+}
+
+users.push({user,pass})
+
+localStorage.setItem("users",JSON.stringify(users))
+
+msg.textContent="Compte créé"
+msg.className="message"
+
+}
+
+// ---------- LOGIN ----------
+
+function login(){
+
+let user=document.getElementById("loginUser").value.trim().toLowerCase()
+let pass=document.getElementById("loginPass").value.trim()
+
+let users=JSON.parse(localStorage.getItem("users")||"[]")
+
+let found=users.find(u=>u.user===user && u.pass===pass)
+
+let msg=document.getElementById("loginMsg")
+
+if(found){
+
+currentUser=user
+
+localStorage.setItem("currentUser",user)
+
+auth.style.display="none"
+app.style.display="block"
+
+document.getElementById("currentUser").textContent=user
+
+chargerNotes()
+
+}else{
+
+msg.textContent="Identifiants incorrects"
+
+}
+
+}
+
+// ---------- LOGOUT ----------
+
 function logout(){
-    currentUser = null;
-    notes = [];
-    document.getElementById("auth").style.display = "block";
-    document.getElementById("app").style.display = "none";
+
+localStorage.removeItem("currentUser")
+
+currentUser=null
+notes=[]
+
+auth.style.display="block"
+app.style.display="none"
+
 }
 
-// ----- Ajouter une note -----
+// ---------- AJOUT NOTE ----------
+
 function ajouterNote(){
-    let matiere = document.getElementById("matiere").value.trim();
-    let note = parseFloat(document.getElementById("note").value);
-    let coef = parseFloat(document.getElementById("coef").value);
-    let msg = document.getElementById("noteMsg");
-    msg.textContent = "";
 
-    if(!matiere || isNaN(note) || isNaN(coef) || note < 0 || coef <= 0){
-        msg.textContent = "Remplis correctement tous les champs";
-        msg.className = "error";
-        return;
-    }
+let matiere=document.getElementById("matiere").value.trim()
+let note=parseFloat(document.getElementById("note").value)
+let coef=parseFloat(document.getElementById("coef").value)
 
-    let objetNote = { matiere, note, coef };
-    let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
+let msg=document.getElementById("noteMsg")
 
-    // ✅ Important : ne pas écraser les notes existantes
-    if(!savedNotes[currentUser]){
-        savedNotes[currentUser] = [];
-    }
-    savedNotes[currentUser].push(objetNote);
+if(!matiere || isNaN(note) || isNaN(coef)){
 
-    localStorage.setItem("notes", JSON.stringify(savedNotes));
-    notes = savedNotes[currentUser];
+msg.textContent="Remplis correctement"
+msg.className="error"
+return
 
-    afficherNotes();
-    calculerMoyenne();
-
-    document.getElementById("matiere").value = "";
-    document.getElementById("note").value = "";
-    document.getElementById("coef").value = "";
-
-    msg.textContent = "Note ajoutée !";
-    msg.className = "message";
 }
 
-// ----- Charger les notes -----
+let objet={matiere,note,coef,date:new Date().toLocaleDateString()}
+
+let saved=JSON.parse(localStorage.getItem("notes")||"{}")
+
+if(!saved[currentUser]) saved[currentUser]=[]
+
+saved[currentUser].push(objet)
+
+localStorage.setItem("notes",JSON.stringify(saved))
+
+notes=saved[currentUser]
+
+afficherNotes()
+calculerStats()
+
+}
+
+// ---------- CHARGER NOTES ----------
+
 function chargerNotes(){
-    let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
-    notes = savedNotes[currentUser] || [];
-    afficherNotes();
-    calculerMoyenne();
+
+let saved=JSON.parse(localStorage.getItem("notes")||"{}")
+
+notes=saved[currentUser]||[]
+
+afficherNotes()
+calculerStats()
+
 }
 
-// ----- Afficher les notes -----
-function afficherNotes() {
-    let liste = document.getElementById("listeNotes");
-    liste.innerHTML = "";
+// ---------- AFFICHER ----------
 
-    if(notes.length === 0){
-        liste.textContent = "Aucune note ajoutée.";
-        document.getElementById("stats").textContent = "";
-        return;
-    }
+function afficherNotes(list=notes){
 
-    notes.forEach((n, index) => {
-        let li = document.createElement("li");
-        li.textContent = n.matiere + " : " + n.note + " (coef " + n.coef + ")";
-        li.title = "Cliquez pour modifier";
+let ul=document.getElementById("notesList")
 
-        // ----- Modifier la note au clic sur le li -----
-        li.onclick = () => {
-            let newMatiere = prompt("Matière :", n.matiere);
-            let newNote = parseFloat(prompt("Note :", n.note));
-            let newCoef = parseFloat(prompt("Coefficient :", n.coef));
-            if(newMatiere && !isNaN(newNote) && !isNaN(newCoef) && newNote >=0 && newCoef>0){
-                n.matiere = newMatiere.trim();
-                n.note = newNote;
-                n.coef = newCoef;
-                let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
-                savedNotes[currentUser] = notes;
-                localStorage.setItem("notes", JSON.stringify(savedNotes));
-                afficherNotes();
-                calculerMoyenne();
-            }
-        };
+ul.innerHTML=""
 
-        // ----- Bouton supprimer -----
-        let btn = document.createElement("button");
-        btn.textContent = "Supprimer";
-        btn.onclick = (e) => {
-            e.stopPropagation(); // pour ne pas déclencher la modification
-            notes.splice(index, 1);
-            let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
-            savedNotes[currentUser] = notes;
-            localStorage.setItem("notes", JSON.stringify(savedNotes));
-            afficherNotes();
-            calculerMoyenne();
-        };
+list.forEach((n,i)=>{
 
-        li.appendChild(btn);
-        liste.appendChild(li);
-    });
+let li=document.createElement("li")
 
-    document.getElementById("stats").textContent = `Nombre de notes : ${notes.length}`;
+let span=document.createElement("span")
+
+span.textContent=`${n.matiere} : ${n.note} (coef ${n.coef})`
+
+span.className="note-text"
+
+if(n.note>=16) span.classList.add("good")
+else if(n.note>=10) span.classList.add("medium")
+else span.classList.add("bad")
+
+span.onclick=()=>modifierNote(i)
+
+let del=document.createElement("button")
+
+del.textContent="Supprimer"
+
+del.onclick=()=>supprimerNote(i)
+
+li.appendChild(span)
+li.appendChild(del)
+
+ul.appendChild(li)
+
+})
+
 }
 
-// ----- Calculer la moyenne -----
-function calculerMoyenne(){
-    let total = 0;
-    let totalCoef = 0;
+// ---------- SUPPRIMER ----------
 
-    notes.forEach(n => {
-        total += n.note * n.coef;
-        totalCoef += n.coef;
-    });
+function supprimerNote(i){
 
-    let moyenne = totalCoef > 0 ? total / totalCoef : 0;
-    document.getElementById("moyenne").textContent = moyenne.toFixed(2);
+notes.splice(i,1)
+
+save()
+
+}
+
+// ---------- MODIFIER ----------
+
+function modifierNote(i){
+
+let n=notes[i]
+
+let matiere=prompt("Matière",n.matiere)
+let note=parseFloat(prompt("Note",n.note))
+let coef=parseFloat(prompt("Coefficient",n.coef))
+
+if(!matiere || isNaN(note) || isNaN(coef)) return
+
+notes[i]={matiere,note,coef,date:n.date}
+
+save()
+
+}
+
+// ---------- SAVE ----------
+
+function save(){
+
+let saved=JSON.parse(localStorage.getItem("notes")||"{}")
+
+saved[currentUser]=notes
+
+localStorage.setItem("notes",JSON.stringify(saved))
+
+afficherNotes()
+calculerStats()
+
+}
+
+// ---------- RECHERCHE ----------
+
+function rechercher(){
+
+let txt=document.getElementById("searchInput").value.toLowerCase()
+
+let filtered=notes.filter(n=>n.matiere.toLowerCase().includes(txt))
+
+afficherNotes(filtered)
+
+}
+
+// ---------- STATISTIQUES ----------
+
+function calculerStats(){
+
+if(notes.length===0){
+
+document.getElementById("stats").textContent="Aucune note"
+
+return
+
+}
+
+let total=0
+let coefTotal=0
+
+let best=notes[0].note
+let worst=notes[0].note
+
+notes.forEach(n=>{
+
+total+=n.note*n.coef
+coefTotal+=n.coef
+
+if(n.note>best) best=n.note
+if(n.note<worst) worst=n.note
+
+})
+
+let moyenne=total/coefTotal
+
+document.getElementById("moyenne").textContent=moyenne.toFixed(2)
+
+document.getElementById("stats").innerHTML=
+
+`
+
+<div class="stats-box">Nombre de notes : ${notes.length}</div>
+<div class="stats-box">Meilleure note : ${best}</div>
+<div class="stats-box">Pire note : ${worst}</div>
+
+`
+
 }
