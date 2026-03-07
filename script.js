@@ -1,63 +1,46 @@
-let notes = []
-let currentUser = null
+let notes=[]
+let currentUser=null
+let chart=null
 
-const auth = document.getElementById("auth")
-const app = document.getElementById("app")
+registerBtn.onclick=register
+loginBtn.onclick=login
+logoutBtn.onclick=logout
+addNoteBtn.onclick=addNote
+themeBtn.onclick=toggleTheme
+searchInput.oninput=search
+exportPDF.onclick=exportPDF
 
-// boutons
-document.getElementById("registerBtn").onclick = register
-document.getElementById("loginBtn").onclick = login
-document.getElementById("logoutBtn").onclick = logout
-document.getElementById("addNoteBtn").onclick = ajouterNote
-
-document.getElementById("searchInput").addEventListener("input",rechercher)
-
-window.onload = autoLogin
-
-// ---------- AUTO LOGIN ----------
+window.onload=autoLogin
 
 function autoLogin(){
 
-let savedUser = localStorage.getItem("currentUser")
+let saved=localStorage.getItem("currentUser")
 
-if(savedUser){
+if(saved){
 
-currentUser = savedUser
+currentUser=saved
 
 auth.style.display="none"
 app.style.display="block"
 
-document.getElementById("currentUser").textContent=currentUser
+currentUserSpan.textContent=saved
 
-chargerNotes()
-
-}
+loadNotes()
 
 }
 
-// ---------- INSCRIPTION ----------
+}
 
 function register(){
 
-let user=document.getElementById("registerUser").value.trim().toLowerCase()
-let pass=document.getElementById("registerPass").value.trim()
-
-let msg=document.getElementById("registerMsg")
-
-if(!user || !pass){
-
-msg.textContent="Remplis tous les champs"
-msg.className="error"
-return
-
-}
+let user=registerUser.value.trim().toLowerCase()
+let pass=registerPass.value
 
 let users=JSON.parse(localStorage.getItem("users")||"[]")
 
 if(users.some(u=>u.user===user)){
 
-msg.textContent="Utilisateur déjà existant"
-msg.className="error"
+registerMsg.textContent="Utilisateur déjà existant"
 return
 
 }
@@ -66,25 +49,25 @@ users.push({user,pass})
 
 localStorage.setItem("users",JSON.stringify(users))
 
-msg.textContent="Compte créé"
-msg.className="message"
+registerMsg.textContent="Compte créé"
 
 }
 
-// ---------- LOGIN ----------
-
 function login(){
 
-let user=document.getElementById("loginUser").value.trim().toLowerCase()
-let pass=document.getElementById("loginPass").value.trim()
+let user=loginUser.value.trim().toLowerCase()
+let pass=loginPass.value
 
 let users=JSON.parse(localStorage.getItem("users")||"[]")
 
 let found=users.find(u=>u.user===user && u.pass===pass)
 
-let msg=document.getElementById("loginMsg")
+if(!found){
 
-if(found){
+loginMsg.textContent="Identifiants incorrects"
+return
+
+}
 
 currentUser=user
 
@@ -93,148 +76,43 @@ localStorage.setItem("currentUser",user)
 auth.style.display="none"
 app.style.display="block"
 
-document.getElementById("currentUser").textContent=user
+currentUserSpan.textContent=user
 
-chargerNotes()
-
-}else{
-
-msg.textContent="Identifiants incorrects"
+loadNotes()
 
 }
-
-}
-
-// ---------- LOGOUT ----------
 
 function logout(){
 
 localStorage.removeItem("currentUser")
 
-currentUser=null
-notes=[]
-
-auth.style.display="block"
-app.style.display="none"
+location.reload()
 
 }
 
-// ---------- AJOUT NOTE ----------
+function addNote(){
 
-function ajouterNote(){
+let mat=matiere.value
+let n=parseFloat(note.value)
+let c=parseFloat(coef.value)
 
-let matiere=document.getElementById("matiere").value.trim()
-let note=parseFloat(document.getElementById("note").value)
-let coef=parseFloat(document.getElementById("coef").value)
+if(!mat||isNaN(n)||isNaN(c))return
 
-let msg=document.getElementById("noteMsg")
+notes.push({matiere:mat,note:n,coef:c})
 
-if(!matiere || isNaN(note) || isNaN(coef)){
-
-msg.textContent="Remplis correctement"
-msg.className="error"
-return
+save()
 
 }
 
-let objet={matiere,note,coef,date:new Date().toLocaleDateString()}
-
-let saved=JSON.parse(localStorage.getItem("notes")||"{}")
-
-if(!saved[currentUser]) saved[currentUser]=[]
-
-saved[currentUser].push(objet)
-
-localStorage.setItem("notes",JSON.stringify(saved))
-
-notes=saved[currentUser]
-
-afficherNotes()
-calculerStats()
-
-}
-
-// ---------- CHARGER NOTES ----------
-
-function chargerNotes(){
+function loadNotes(){
 
 let saved=JSON.parse(localStorage.getItem("notes")||"{}")
 
 notes=saved[currentUser]||[]
 
-afficherNotes()
-calculerStats()
+render()
 
 }
-
-// ---------- AFFICHER ----------
-
-function afficherNotes(list=notes){
-
-let ul=document.getElementById("notesList")
-
-ul.innerHTML=""
-
-list.forEach((n,i)=>{
-
-let li=document.createElement("li")
-
-let span=document.createElement("span")
-
-span.textContent=`${n.matiere} : ${n.note} (coef ${n.coef})`
-
-span.className="note-text"
-
-if(n.note>=16) span.classList.add("good")
-else if(n.note>=10) span.classList.add("medium")
-else span.classList.add("bad")
-
-span.onclick=()=>modifierNote(i)
-
-let del=document.createElement("button")
-
-del.textContent="Supprimer"
-
-del.onclick=()=>supprimerNote(i)
-
-li.appendChild(span)
-li.appendChild(del)
-
-ul.appendChild(li)
-
-})
-
-}
-
-// ---------- SUPPRIMER ----------
-
-function supprimerNote(i){
-
-notes.splice(i,1)
-
-save()
-
-}
-
-// ---------- MODIFIER ----------
-
-function modifierNote(i){
-
-let n=notes[i]
-
-let matiere=prompt("Matière",n.matiere)
-let note=parseFloat(prompt("Note",n.note))
-let coef=parseFloat(prompt("Coefficient",n.coef))
-
-if(!matiere || isNaN(note) || isNaN(coef)) return
-
-notes[i]={matiere,note,coef,date:n.date}
-
-save()
-
-}
-
-// ---------- SAVE ----------
 
 function save(){
 
@@ -244,63 +122,186 @@ saved[currentUser]=notes
 
 localStorage.setItem("notes",JSON.stringify(saved))
 
-afficherNotes()
-calculerStats()
+render()
 
 }
 
-// ---------- RECHERCHE ----------
+function render(){
 
-function rechercher(){
+displayNotes(notes)
 
-let txt=document.getElementById("searchInput").value.toLowerCase()
+stats()
 
-let filtered=notes.filter(n=>n.matiere.toLowerCase().includes(txt))
+subjectAverage()
 
-afficherNotes(filtered)
+drawChart()
+
+}
+
+function displayNotes(list){
+
+notesList.innerHTML=""
+
+list.forEach((n,i)=>{
+
+let li=document.createElement("li")
+
+let span=document.createElement("span")
+
+span.textContent=`${n.matiere} : ${n.note} (coef ${n.coef})`
+
+if(n.note>=16)span.className="good"
+else if(n.note>=10)span.className="medium"
+else span.className="bad"
+
+let del=document.createElement("button")
+
+del.textContent="X"
+
+del.onclick=()=>{
+
+notes.splice(i,1)
+
+save()
 
 }
 
-// ---------- STATISTIQUES ----------
+li.appendChild(span)
+li.appendChild(del)
 
-function calculerStats(){
+notesList.appendChild(li)
 
-if(notes.length===0){
-
-document.getElementById("stats").textContent="Aucune note"
-
-return
+})
 
 }
+
+function stats(){
 
 let total=0
 let coefTotal=0
 
-let best=notes[0].note
-let worst=notes[0].note
+let best=0
+let worst=20
 
 notes.forEach(n=>{
 
 total+=n.note*n.coef
 coefTotal+=n.coef
 
-if(n.note>best) best=n.note
-if(n.note<worst) worst=n.note
+if(n.note>best)best=n.note
+if(n.note<worst)worst=n.note
 
 })
 
-let moyenne=total/coefTotal
+let avg=coefTotal?total/coefTotal:0
 
-document.getElementById("moyenne").textContent=moyenne.toFixed(2)
+moyenne.textContent=avg.toFixed(2)
 
-document.getElementById("stats").innerHTML=
-
-`
-
-<div class="stats-box">Nombre de notes : ${notes.length}</div>
-<div class="stats-box">Meilleure note : ${best}</div>
-<div class="stats-box">Pire note : ${worst}</div>
+stats.innerHTML=
 
 `
+<div>Nombre de notes : ${notes.length}</div>
+<div>Meilleure note : ${best}</div>
+<div>Pire note : ${worst}</div>
+`
+
+}
+
+function subjectAverage(){
+
+let map={}
+
+notes.forEach(n=>{
+
+if(!map[n.matiere])map[n.matiere]={total:0,coef:0}
+
+map[n.matiere].total+=n.note*n.coef
+map[n.matiere].coef+=n.coef
+
+})
+
+let html=""
+
+for(let m in map){
+
+let avg=(map[m].total/map[m].coef).toFixed(2)
+
+html+=`<div>${m} : ${avg}</div>`
+
+}
+
+subjectAverage.innerHTML=html
+
+}
+
+function search(){
+
+let txt=searchInput.value.toLowerCase()
+
+let filtered=notes.filter(n=>n.matiere.toLowerCase().includes(txt))
+
+displayNotes(filtered)
+
+}
+
+function drawChart(){
+
+let ctx=document.getElementById("chart")
+
+let labels=notes.map(n=>n.matiere)
+
+let data=notes.map(n=>n.note)
+
+if(chart)chart.destroy()
+
+chart=new Chart(ctx,{
+
+type:"bar",
+
+data:{
+
+labels:labels,
+
+datasets:[{
+
+label:"Notes",
+
+data:data,
+
+backgroundColor:"#2a78ff"
+
+}]
+
+}
+
+})
+
+}
+
+function exportPDF(){
+
+const {jsPDF}=window.jspdf
+
+let pdf=new jsPDF()
+
+pdf.text("Bulletin de notes",20,20)
+
+let y=40
+
+notes.forEach(n=>{
+
+pdf.text(`${n.matiere} : ${n.note} coef ${n.coef}`,20,y)
+
+y+=10
+
+})
+
+pdf.save("bulletin.pdf")
+
+}
+
+function toggleTheme(){
+
+document.body.classList.toggle("dark")
 
 }
