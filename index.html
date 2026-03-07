@@ -1,230 +1,88 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
+
 <meta charset="UTF-8">
-<title>Gestion des Notes</title>
-<style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    #app { display: none; }
-    h2 { margin-top: 30px; }
-    input { margin: 5px 0; padding: 5px; }
-    button { margin: 5px 0; padding: 5px 10px; }
-    ul { list-style: none; padding-left: 0; }
-    li { margin: 5px 0; cursor: pointer; }
-    li:hover { background: #f0f0f0; }
-    .message { color: green; margin: 10px 0; }
-    .error { color: red; margin: 10px 0; }
-</style>
+<title>Gestionnaire de Notes Avancé</title>
+
+<link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
 
-<div id="auth">
-    <h2>Inscription</h2>
-    <input type="text" id="registerUser" placeholder="Utilisateur">
-    <input type="password" id="registerPass" placeholder="Mot de passe">
-    <button onclick="register()">Créer un compte</button>
-    <div id="registerMsg" class="message"></div>
+<h1>🎓 Gestionnaire de Notes</h1>
 
-    <h2>Connexion</h2>
-    <input type="text" id="loginUser" placeholder="Utilisateur">
-    <input type="password" id="loginPass" placeholder="Mot de passe">
-    <button onclick="login()">Se connecter</button>
-    <div id="loginMsg" class="error"></div>
+<div id="auth">
+
+<h2>Créer un compte</h2>
+
+<input type="text" id="registerUser" placeholder="Utilisateur">
+<input type="password" id="registerPass" placeholder="Mot de passe">
+
+<button id="registerBtn">Créer un compte</button>
+
+<p id="registerMsg"></p>
+
+<h2>Connexion</h2>
+
+<input type="text" id="loginUser" placeholder="Utilisateur">
+<input type="password" id="loginPass" placeholder="Mot de passe">
+
+<button id="loginBtn">Connexion</button>
+
+<p id="loginMsg"></p>
+
 </div>
 
 <div id="app">
-    <h2>Bienvenue, <span id="currentUserDisplay"></span></h2>
-    <button onclick="logout()">Déconnexion</button>
 
-    <h3>Ajouter une note</h3>
-    <input type="text" id="matiere" placeholder="Matière">
-    <input type="number" step="0.01" id="note" placeholder="Note">
-    <input type="number" step="0.01" id="coef" placeholder="Coefficient">
-    <button onclick="ajouterNote()">Ajouter</button>
-    <div id="noteMsg" class="message"></div>
+<div class="topbar">
 
-    <h3>Liste des notes</h3>
-    <ul id="listeNotes"></ul>
-    <div id="stats"></div>
+<h2>Bienvenue <span id="currentUser"></span></h2>
 
-    <h3>Moyenne : <span id="moyenne">0.00</span></h3>
+<button id="logoutBtn">Déconnexion</button>
+
 </div>
 
-<script>
-// ----- Variables globales -----
-let notes = [];
-let currentUser = null;
+<hr>
 
-// ----- Inscription -----
-function register() {
-    let user = document.getElementById("registerUser").value.trim().toLowerCase();
-    let pass = document.getElementById("registerPass").value.trim();
-    let msg = document.getElementById("registerMsg");
-    msg.textContent = "";
+<h3>Ajouter une note</h3>
 
-    if(user === "" || pass === ""){
-        msg.textContent = "Remplis tous les champs";
-        msg.className = "error";
-        return;
-    }
+<input type="text" id="matiere" placeholder="Matière">
 
-    let users = JSON.parse(localStorage.getItem("users") || "[]");
-    if(users.some(u => u.user === user)){
-        msg.textContent = "Utilisateur déjà existant";
-        msg.className = "error";
-        return;
-    }
+<input type="number" id="note" placeholder="Note">
 
-    users.push({ user, pass });
-    localStorage.setItem("users", JSON.stringify(users));
-    msg.textContent = "Compte créé !";
-    msg.className = "message";
+<input type="number" id="coef" placeholder="Coefficient">
 
-    document.getElementById("registerUser").value = "";
-    document.getElementById("registerPass").value = "";
-}
+<button id="addNoteBtn">Ajouter</button>
 
-// ----- Connexion -----
-function login() {
-    let user = document.getElementById("loginUser").value.trim().toLowerCase();
-    let pass = document.getElementById("loginPass").value.trim();
-    let msg = document.getElementById("loginMsg");
-    msg.textContent = "";
+<p id="noteMsg"></p>
 
-    let users = JSON.parse(localStorage.getItem("users") || "[]");
-    let found = users.find(u => u.user === user && u.pass === pass);
+<hr>
 
-    if(found){
-        currentUser = user;
-        document.getElementById("auth").style.display = "none";
-        document.getElementById("app").style.display = "block";
-        document.getElementById("currentUserDisplay").textContent = currentUser;
-        chargerNotes();
-    } else {
-        msg.textContent = "Identifiants incorrects";
-    }
-}
+<h3>Rechercher une matière</h3>
 
-// ----- Déconnexion -----
-function logout(){
-    currentUser = null;
-    notes = [];
-    document.getElementById("auth").style.display = "block";
-    document.getElementById("app").style.display = "none";
-}
+<input type="text" id="searchInput" placeholder="Rechercher...">
 
-// ----- Ajouter une note -----
-function ajouterNote(){
-    let matiere = document.getElementById("matiere").value.trim();
-    let note = parseFloat(document.getElementById("note").value);
-    let coef = parseFloat(document.getElementById("coef").value);
-    let msg = document.getElementById("noteMsg");
-    msg.textContent = "";
+<hr>
 
-    if(!matiere || isNaN(note) || isNaN(coef)){
-        msg.textContent = "Remplis tous les champs correctement";
-        msg.className = "error";
-        return;
-    }
-    if(note < 0 || coef <= 0){
-        msg.textContent = "La note doit être ≥ 0 et le coefficient > 0";
-        msg.className = "error";
-        return;
-    }
+<h3>Liste des notes</h3>
 
-    let objetNote = { matiere, note, coef };
+<ul id="notesList"></ul>
 
-    let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
-    if(!savedNotes[currentUser]){
-        savedNotes[currentUser] = [];
-    }
-    savedNotes[currentUser].push(objetNote);
-    localStorage.setItem("notes", JSON.stringify(savedNotes));
+<hr>
 
-    notes = savedNotes[currentUser];
-    afficherNotes();
-    calculerMoyenne();
+<h3>Statistiques</h3>
 
-    document.getElementById("matiere").value = "";
-    document.getElementById("note").value = "";
-    document.getElementById("coef").value = "";
-    msg.textContent = "Note ajoutée !";
-    msg.className = "message";
-}
+<div id="stats"></div>
 
-// ----- Charger les notes -----
-function chargerNotes(){
-    let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
-    notes = savedNotes[currentUser] || [];
-    afficherNotes();
-    calculerMoyenne();
-}
+<h2>Moyenne générale : <span id="moyenne">0</span></h2>
 
-// ----- Afficher les notes -----
-function afficherNotes() {
-    let liste = document.getElementById("listeNotes");
-    liste.innerHTML = "";
+</div>
 
-    if(notes.length === 0){
-        liste.textContent = "Aucune note ajoutée.";
-        document.getElementById("stats").textContent = "";
-        return;
-    }
+<script src="script.js"></script>
 
-    notes.forEach((n, index) => {
-        let li = document.createElement("li");
-        li.textContent = n.matiere + " : " + n.note + " (coef " + n.coef + ")";
-        li.title = "Cliquez pour modifier";
-
-        // Cliquer pour modifier
-        li.onclick = () => {
-            let newMatiere = prompt("Matière :", n.matiere);
-            let newNote = parseFloat(prompt("Note :", n.note));
-            let newCoef = parseFloat(prompt("Coefficient :", n.coef));
-            if(newMatiere && !isNaN(newNote) && !isNaN(newCoef) && newNote >=0 && newCoef>0){
-                n.matiere = newMatiere.trim();
-                n.note = newNote;
-                n.coef = newCoef;
-                let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
-                savedNotes[currentUser] = notes;
-                localStorage.setItem("notes", JSON.stringify(savedNotes));
-                afficherNotes();
-                calculerMoyenne();
-            }
-        };
-
-        // Bouton supprimer
-        let btn = document.createElement("button");
-        btn.textContent = "Supprimer";
-        btn.style.marginLeft = "10px";
-        btn.onclick = (e) => {
-            e.stopPropagation(); // empêche le click parent
-            notes.splice(index, 1);
-            let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
-            savedNotes[currentUser] = notes;
-            localStorage.setItem("notes", JSON.stringify(savedNotes));
-            afficherNotes();
-            calculerMoyenne();
-        };
-
-        li.appendChild(btn);
-        liste.appendChild(li);
-    });
-
-    document.getElementById("stats").textContent = `Nombre de notes : ${notes.length}`;
-}
-
-// ----- Calculer la moyenne -----
-function calculerMoyenne(){
-    let total = 0;
-    let totalCoef = 0;
-
-    notes.forEach(n => {
-        total += n.note * n.coef;
-        totalCoef += n.coef;
-    });
-
-    let moyenne = totalCoef > 0 ? total / totalCoef : 0;
-    document.getElementById("moyenne").textContent = moyenne.toFixed(2);
-}
-</script>
+</body>
+</html>
