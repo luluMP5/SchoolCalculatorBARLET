@@ -1,34 +1,57 @@
 body{
 
-font-family: Arial;
-background:#eef2f7;
-padding:40px;
+font-family:Arial;
+background:#f5f7fb;
+margin:0;
+padding:30px;
 
 }
 
-h1{
+header{
 
-text-align:center;
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+}
+
+section{
+
+margin:20px 0;
+background:white;
+padding:15px;
+border-radius:8px;
+
+}
+
+.dark{
+
+background:#1e1e1e;
+color:white;
+
+}
+
+.dark section{
+
+background:#2d2d2d;
 
 }
 
 input{
 
 display:block;
-margin:6px 0;
-padding:10px;
-width:220px;
-border-radius:6px;
-border:1px solid #ccc;
+margin:5px 0;
+padding:8px;
+width:200px;
 
 }
 
 button{
 
-padding:8px 14px;
-border:none;
-background:#2979ff;
+padding:8px 12px;
+background:#2a78ff;
 color:white;
+border:none;
 border-radius:6px;
 cursor:pointer;
 
@@ -36,13 +59,7 @@ cursor:pointer;
 
 button:hover{
 
-background:#1c54b2;
-
-}
-
-#app{
-
-display:none;
+background:#1d55b5;
 
 }
 
@@ -55,19 +72,12 @@ padding:0;
 
 li{
 
-background:white;
-margin:8px 0;
-padding:10px;
-border-radius:6px;
 display:flex;
 justify-content:space-between;
-align-items:center;
-
-}
-
-.note-text{
-
-cursor:pointer;
+background:#eef2f8;
+margin:5px 0;
+padding:8px;
+border-radius:6px;
 
 }
 
@@ -87,35 +97,11 @@ color:orange;
 .bad{
 
 color:red;
-font-weight:bold;
 
 }
 
-.topbar{
+#app{
 
-display:flex;
-justify-content:space-between;
-align-items:center;
-
-}
-
-.message{
-
-color:green;
-
-}
-
-.error{
-
-color:red;
-
-}
-
-.stats-box{
-
-background:white;
-padding:10px;
-margin:5px 0;
-border-radius:6px;
+display:none;
 
 }
