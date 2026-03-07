@@ -91,47 +91,34 @@ location.reload()
 }
 
 function ajouterNote() {
-    // Récupère les valeurs des inputs
+    // Récupération des valeurs des inputs
     let mat = document.getElementById("matiere").value.trim();
     let n = parseFloat(document.getElementById("note").value);
     let c = parseFloat(document.getElementById("coef").value);
 
-    // Vérifie que les champs sont valides
+    // Vérification que les champs sont valides
     if (!mat || isNaN(n) || isNaN(c)) return;
 
-    // Récupère toutes les notes existantes depuis localStorage
-    let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
+    // Récupération des notes existantes depuis localStorage
+    let saved = JSON.parse(localStorage.getItem("notes") || "{}");
 
-    // Si l'utilisateur n'a pas encore de notes, créer un tableau vide
-    if (!savedNotes[currentUser]) savedNotes[currentUser] = [];
+    // Création du tableau de notes pour l'utilisateur si nécessaire
+    if (!saved[currentUser]) saved[currentUser] = [];
 
-    // Ajouter la nouvelle note dans le tableau existant
-    savedNotes[currentUser].push({ matiere: mat, note: n, coef: c });
+    // Ajout de la nouvelle note
+    saved[currentUser].push({ matiere: mat, note: n, coef: c });
 
-    // Sauvegarde tout dans localStorage
-    localStorage.setItem("notes", JSON.stringify(savedNotes));
+    // Sauvegarde dans localStorage
+    localStorage.setItem("notes", JSON.stringify(saved));
 
-    // Met à jour le tableau local et l'affichage
-    notes = savedNotes[currentUser];
-    afficherNotes();
-    calculerMoyenne();
+    // Mise à jour du tableau local et affichage
+    notes = saved[currentUser];
+    render();
 
-    // Vide les inputs
+    // Vidage des inputs
     document.getElementById("matiere").value = "";
     document.getElementById("note").value = "";
     document.getElementById("coef").value = "";
-}
-
-localStorage.setItem("notes", JSON.stringify(saved))
-
-notes = saved[currentUser]
-
-render()
-
-document.getElementById("matiere").value=""
-document.getElementById("note").value=""
-document.getElementById("coef").value=""
-
 }
 
 function loadNotes(){
