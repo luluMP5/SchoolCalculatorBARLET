@@ -90,18 +90,36 @@ location.reload()
 
 }
 
-function addNote(){
+function ajouterNote() {
+    // Récupère les valeurs des inputs
+    let mat = document.getElementById("matiere").value.trim();
+    let n = parseFloat(document.getElementById("note").value);
+    let c = parseFloat(document.getElementById("coef").value);
 
-let mat = document.getElementById("matiere").value.trim()
-let n = parseFloat(document.getElementById("note").value)
-let c = parseFloat(document.getElementById("coef").value)
+    // Vérifie que les champs sont valides
+    if (!mat || isNaN(n) || isNaN(c)) return;
 
-if(!mat || isNaN(n) || isNaN(c)) return
+    // Récupère toutes les notes existantes depuis localStorage
+    let savedNotes = JSON.parse(localStorage.getItem("notes") || "{}");
 
-let saved = JSON.parse(localStorage.getItem("notes") || "{}")
+    // Si l'utilisateur n'a pas encore de notes, créer un tableau vide
+    if (!savedNotes[currentUser]) savedNotes[currentUser] = [];
 
-if(!saved[currentUser]){
-saved[currentUser] = []
+    // Ajouter la nouvelle note dans le tableau existant
+    savedNotes[currentUser].push({ matiere: mat, note: n, coef: c });
+
+    // Sauvegarde tout dans localStorage
+    localStorage.setItem("notes", JSON.stringify(savedNotes));
+
+    // Met à jour le tableau local et l'affichage
+    notes = savedNotes[currentUser];
+    afficherNotes();
+    calculerMoyenne();
+
+    // Vide les inputs
+    document.getElementById("matiere").value = "";
+    document.getElementById("note").value = "";
+    document.getElementById("coef").value = "";
 }
 
 saved[currentUser].push({
