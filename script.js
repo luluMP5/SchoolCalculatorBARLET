@@ -92,15 +92,33 @@ location.reload()
 
 function addNote(){
 
-let mat=matiere.value
-let n=parseFloat(note.value)
-let c=parseFloat(coef.value)
+let mat = document.getElementById("matiere").value.trim()
+let n = parseFloat(document.getElementById("note").value)
+let c = parseFloat(document.getElementById("coef").value)
 
-if(!mat||isNaN(n)||isNaN(c))return
+if(!mat || isNaN(n) || isNaN(c)) return
 
-notes.push({matiere:mat,note:n,coef:c})
+let saved = JSON.parse(localStorage.getItem("notes") || "{}")
 
-save()
+if(!saved[currentUser]){
+saved[currentUser] = []
+}
+
+saved[currentUser].push({
+matiere: mat,
+note: n,
+coef: c
+})
+
+localStorage.setItem("notes", JSON.stringify(saved))
+
+notes = saved[currentUser]
+
+render()
+
+document.getElementById("matiere").value=""
+document.getElementById("note").value=""
+document.getElementById("coef").value=""
 
 }
 
