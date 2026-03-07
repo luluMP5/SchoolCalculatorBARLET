@@ -4,31 +4,46 @@
 <head>
 
 <meta charset="UTF-8">
-<title>Gestionnaire de Notes Avancé</title>
+<title>Gestionnaire de Notes Pro+</title>
 
 <link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </head>
 
 <body>
 
-<h1>🎓 Gestionnaire de Notes</h1>
+<header>
+
+<h1>🎓 Dashboard de Notes</h1>
+
+<div>
+
+<button id="themeBtn">🌙</button>
+<button id="exportPDF">Exporter PDF</button>
+
+</div>
+
+</header>
 
 <div id="auth">
 
 <h2>Créer un compte</h2>
 
-<input type="text" id="registerUser" placeholder="Utilisateur">
-<input type="password" id="registerPass" placeholder="Mot de passe">
+<input id="registerUser" placeholder="Utilisateur">
+<input id="registerPass" type="password" placeholder="Mot de passe">
 
-<button id="registerBtn">Créer un compte</button>
+<button id="registerBtn">Créer</button>
 
 <p id="registerMsg"></p>
 
 <h2>Connexion</h2>
 
-<input type="text" id="loginUser" placeholder="Utilisateur">
-<input type="password" id="loginPass" placeholder="Mot de passe">
+<input id="loginUser" placeholder="Utilisateur">
+<input id="loginPass" type="password" placeholder="Mot de passe">
 
 <button id="loginBtn">Connexion</button>
 
@@ -38,7 +53,7 @@
 
 <div id="app">
 
-<div class="topbar">
+<div class="top">
 
 <h2>Bienvenue <span id="currentUser"></span></h2>
 
@@ -46,39 +61,59 @@
 
 </div>
 
-<hr>
+<section class="add">
 
 <h3>Ajouter une note</h3>
 
-<input type="text" id="matiere" placeholder="Matière">
-
-<input type="number" id="note" placeholder="Note">
-
-<input type="number" id="coef" placeholder="Coefficient">
+<input id="matiere" placeholder="Matière">
+<input id="note" type="number" placeholder="Note">
+<input id="coef" type="number" placeholder="Coef">
 
 <button id="addNoteBtn">Ajouter</button>
 
-<p id="noteMsg"></p>
+</section>
 
-<hr>
+<section>
 
-<h3>Rechercher une matière</h3>
+<h3>Recherche</h3>
 
-<input type="text" id="searchInput" placeholder="Rechercher...">
+<input id="searchInput" placeholder="Rechercher">
 
-<hr>
+</section>
 
-<h3>Liste des notes</h3>
+<section>
+
+<h3>Notes</h3>
 
 <ul id="notesList"></ul>
 
-<hr>
+</section>
+
+<section>
 
 <h3>Statistiques</h3>
 
 <div id="stats"></div>
 
 <h2>Moyenne générale : <span id="moyenne">0</span></h2>
+
+</section>
+
+<section>
+
+<h3>Moyenne par matière</h3>
+
+<div id="subjectAverage"></div>
+
+</section>
+
+<section>
+
+<h3>Graphique</h3>
+
+<canvas id="chart"></canvas>
+
+</section>
 
 </div>
 
