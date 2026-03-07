@@ -1,123 +1,61 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-
-<meta charset="UTF-8">
-<title>Gestionnaire de Notes Pro+</title>
-
-<link rel="stylesheet" href="style.css">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+    <meta charset="UTF-8">
+    <title>Gestion de Notes</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-
 <body>
 
-<header>
-
-<h1>🎓 Dashboard de Notes</h1>
-
-<div>
-
-<button id="themeBtn">🌙</button>
-<button id="exportPDF">Exporter PDF</button>
-
-</div>
-
-</header>
-
+<!-- ===== AUTHENTIFICATION ===== -->
 <div id="auth">
+    <h2>Inscription</h2>
+    <input type="text" id="registerUser" placeholder="Nom d'utilisateur">
+    <input type="password" id="registerPass" placeholder="Mot de passe">
+    <button id="registerBtn">S'inscrire</button>
+    <div id="registerMsg" class="msg"></div>
 
-<h2>Créer un compte</h2>
-
-<input id="registerUser" placeholder="Utilisateur">
-<input id="registerPass" type="password" placeholder="Mot de passe">
-
-<button id="registerBtn">Créer</button>
-
-<p id="registerMsg"></p>
-
-<h2>Connexion</h2>
-
-<input id="loginUser" placeholder="Utilisateur">
-<input id="loginPass" type="password" placeholder="Mot de passe">
-
-<button id="loginBtn">Connexion</button>
-
-<p id="loginMsg"></p>
-
+    <h2>Connexion</h2>
+    <input type="text" id="loginUser" placeholder="Nom d'utilisateur">
+    <input type="password" id="loginPass" placeholder="Mot de passe">
+    <button id="loginBtn">Se connecter</button>
+    <div id="loginMsg" class="msg"></div>
 </div>
 
-<div id="app">
+<!-- ===== APPLICATION ===== -->
+<div id="app" style="display:none;">
+    <div class="header">
+        <span>Utilisateur : <span id="currentUser"></span></span>
+        <button id="logoutBtn">Déconnexion</button>
+        <button id="themeBtn">Thème Sombre</button>
+    </div>
 
-<div class="top">
+    <h2>Ajouter une note</h2>
+    <input type="text" id="matiere" placeholder="Matière">
+    <input type="number" id="note" placeholder="Note">
+    <input type="number" id="coef" placeholder="Coefficient">
+    <button id="addNoteBtn">Ajouter</button>
 
-<h2>Bienvenue <span id="currentUser"></span></h2>
+    <h2>Rechercher par matière</h2>
+    <input type="text" id="searchInput" placeholder="Recherche...">
 
-<button id="logoutBtn">Déconnexion</button>
+    <h2>Notes</h2>
+    <ul id="notesList"></ul>
 
-</div>
+    <h2>Statistiques</h2>
+    <div id="stats"></div>
+    <div>Moyenne générale : <span id="moyenne">0</span></div>
+    <h3>Moyenne par matière</h3>
+    <div id="subjectAverage"></div>
 
-<section class="add">
+    <h2>Graphique</h2>
+    <canvas id="chart"></canvas>
 
-<h3>Ajouter une note</h3>
-
-<input id="matiere" placeholder="Matière">
-<input id="note" type="number" placeholder="Note">
-<input id="coef" type="number" placeholder="Coef">
-
-<button id="addNoteBtn">Ajouter</button>
-
-</section>
-
-<section>
-
-<h3>Recherche</h3>
-
-<input id="searchInput" placeholder="Rechercher">
-
-</section>
-
-<section>
-
-<h3>Notes</h3>
-
-<ul id="notesList"></ul>
-
-</section>
-
-<section>
-
-<h3>Statistiques</h3>
-
-<div id="stats"></div>
-
-<h2>Moyenne générale : <span id="moyenne">0</span></h2>
-
-</section>
-
-<section>
-
-<h3>Moyenne par matière</h3>
-
-<div id="subjectAverage"></div>
-
-</section>
-
-<section>
-
-<h3>Graphique</h3>
-
-<canvas id="chart"></canvas>
-
-</section>
-
+    <button id="exportPDF">Exporter PDF</button>
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
